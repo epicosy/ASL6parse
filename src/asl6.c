@@ -182,6 +182,8 @@ static int cgc_within(uint8_t *b, unsigned length, unsigned st, unsigned sp)
   unsigned bu = (unsigned) b;
   if (bu < st || bu >= sp)
     return -1;
+  else if (((bu + length) < st || (bu + length) > sp) || bu + length < bu)
+    return -1;
   else
     return 0;
 }
@@ -401,13 +403,16 @@ static void cgc_print_oid(element *e)
       }
     }
 
-    ret = cgc_read_octet_int(&e->data[i], e->length, &v);
+    ret = cgc_read_octet_int(&e->data[i], e->length - i, &v);
 
     if (ret < 0) {
       return;
     }
 
     i += ret;
+
+    if (i >= e->length)
+      return;
 
     cgc_printf(".%u", v);
   }
